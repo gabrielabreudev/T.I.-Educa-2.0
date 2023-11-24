@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include ('partials/header.ejs') %>
+<%- include ('partials/homenavbar.ejs') %>
+
+<style>
+    .card-header-highlighted-article {
+        background-color: #8484842e;
+        border: 2px solid #000000;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .card-body-highlighted-article {
+        background-color: #8484842e;
+        border: 2px solid #007bff;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .content {
+        background-color: #fff;
+        border: 4px solid #007bff;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .highlighted-article:hover {
+        transform: translateY(-5px);
+    }
+
+    .welcome-section {
+        background-color: #007bff;
+        color: #fff;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+        border: 2px solid rgb(6, 4, 142);
+    }
+    
+    .btn-outline-light {
+      background-color: rgb(0, 34, 255); /* Fundo azul */
+      color: white; /* Texto branco */
+      border: 2px solid rgb(6, 4, 142);
+    }
+
+    .btn-primary {
+      background-color: rgb(0, 34, 255); /* Fundo azul */
+      color: white; /* Texto branco */
+      border: 2px solid rgb(6, 4, 142);
+    }
+
+</style>
+  <div class="container">
+    <!-- Espaço entre o cabeçalho e a seção "Bem-vindo" -->
+    <div class="mb-4" style="background-color: #fff;">.</div>
+
+    <!-- Bem-vindo como o cabeçalho -->
+    <div class="welcome-section">
+        <h2>Bem-vindo</h2>
+        <p>Aqui no TI Educa, você pode encontrar as soluções para seus problemas! <br> Temos artigos feitos para te ajudar, e além disso, você também pode realizar uma busca externa.</p>
+    </div>
+
+    <div class="search-section">
+      <form action="/search" method="get">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" style="border: 2px solid rgb(0, 0, 0); border-radius: 10px;" id="searchInput" name="query" placeholder="Pesquisar...">
+                <select class="form-select" style="background-color:#027f1fb8; border-radius: 50px; border: #004711 3px solid; color: #fff;" name="category" onchange="redirectToCategory(this)">
+                    <option value="">Todas as categorias</option>
+                    <% categories.forEach(category => { %>
+                        <option style="background-color: #fff; color:#000;" value="<%= category.slug %>"> <%= category.title %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </form>
+    </div>  
+  
+    <script>
+        function redirectToCategory(selectElement) {
+            const selectedCategorySlug = selectElement.value;
+
+            if (selectedCategorySlug) {
+                // Redirecione para a página da categoria com base no slug
+                window.location.href = `/category/${selectedCategorySlug}`;
+            } else {
+                // Se "Todas as categorias" for selecionada, vá para a página de pesquisa padrão
+                window.location.href = '/search';
+            }
+        }
+    </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const articlesContainer = document.getElementById("articlesContainer");
+    const articles = document.querySelectorAll(".content");
+
+    searchInput.addEventListener("input", function (event) {
+      const searchText = event.target.value.toLowerCase();
+
+      articles.forEach(function (article) {
+        const articleTitle = article.querySelector("h2").innerText.toLowerCase();
+        const articleBody = article.querySelector(".card-body-highlighted-article").innerText.toLowerCase();
+        const articleSlug = article.querySelector("a").getAttribute("href").slice(1);
+
+        if (articleTitle.includes(searchText) || articleBody.includes(searchText)) {
+          article.style.display = "block";
+        } else {
+          article.style.display = "none";
+        }
+      });
+    });
+
+    articlesContainer.addEventListener("click", function (event) {
+      if (event.target.matches(".btn-primary")) {
+        const articleSlug = event.target.getAttribute("href").slice(1);
+        window.location.href = `/${articleSlug}`;
+      }
+    });
+  });
+</script>
+
+    <!-- Lista de artigos abaixo -->
+    <% articles.forEach(article => { %>
+      <div class="content">
+          <div class="card-header-highlighted-article">
+              <h2><%= article.title %></h2>
+          </div>
+          <div class="card-body-highlighted-article">
+              <%- article.body %>
+              <br><br>
+              <a href="/<%= article.slug %>" class="btn btn-primary">Ler artigo</a>
+          </div>
+      </div>
+  <% }) %>
+
+    <!-- Outras seções abaixo -->
+    <body>
+      <div id="content-externa" class="content">
+        <div id="pesquisa-externa" class="card-header highlighted-article">
+          <h2>Pesquisa Externa (IA)</h2>
+        </div>
+        <div id="conteudo-pesquisa-externa" class="card-body highlighted-article">
+          <p><strong>Não encontrou o que precisava?</strong></p>
+          <button class="btn btn-primary" onclick="realizarBuscaExterna();">Realizar busca externa</button>
+        </div>
+      </div>
+      <div class="bottom-of-page"></div>
+</body>    
+
+    <!-- Conteúdo do chatgpt.ejs será carregado aqui -->
+    <div id="chatgpt-widget-container"></div>
+
+    <script>
+      function realizarBuscaExterna() {
+      ocultarPesquisaExterna(); // Oculta o bloco
+      ocultarConteudoPesquisaExterna();
+      ocultarContentExterna();
+      loadChatGPTWidget(); // Carregue o widget de chat
+      setTimeout(scrollToBottom, 100);
+    }
+
+    function ocultarPesquisaExterna() {
+      const pesquisaExterna = document.getElementById("pesquisa-externa");
+      pesquisaExterna.style.display = "none";
+    }
+
+    function ocultarConteudoPesquisaExterna() {
+      const conteudopesquisaExterna = document.getElementById("conteudo-pesquisa-externa");
+      conteudopesquisaExterna.style.display = "none";
+    }
+
+    function ocultarContentExterna() {
+      const contentExterna = document.getElementById("content-externa");
+      contentExterna.style.display = "none";
+    }
+
+      function loadChatGPTWidget() {
+          const widgetContainer = document.getElementById('chatgpt-widget-container');
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', 'views/chatgpt.ejs', true);
+  
+          xhr.onreadystatechange = function () {
+              if (xhr.readyState === 4 && xhr.status === 200) {
+                  widgetContainer.innerHTML = xhr.responseText;
+  
+                  // Execute o script do chatgpt.ejs após carregar o conteúdo
+                  const scriptElement = document.createElement('script');
+                  scriptElement.src = '/views/api.js';
+                  widgetContainer.appendChild(scriptElement);
+
+                  const inputQuestion = document.getElementById("inputQuestion");
+const result = document.getElementById("result");
+
+inputQuestion.addEventListener("keypress", (e) => {
+  if (inputQuestion.value && e.key === "Enter") SendQuestion();
+});
+
+const OPENAI_API_KEY = "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";
+
+function SendQuestion() {
+  var sQuestion = inputQuestion.value;
+ 
+  fetch("https://api.openai.com/v1/completions", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + OPENAI_API_KEY,
+    },
+    body: JSON.stringify({
+      model: "text-davinci-003",
+      prompt: sQuestion,
+      max_tokens: 2048, // tamanho da resposta
+      temperature: 0.5, // criatividade na resposta
+    }),
+  })
+    .then((response) => response.json())
+    .then((json) => {
+      if (result.value) result.value += "\n";
+
+      if (json.error?.message) {
+        result.value += `Error: ${json.error.message}`;
+      } else if (json.choices?.[0].text) {
+        var text = json.choices[0].text || "Sem resposta";
+
+        result.value += "Chat GPT: " + text;
+      }
+
+      result.scrollTop = result.scrollHeight;
+    })
+    .catch((error) => console.error("Error:", error))
+    .finally(() => {
+      inputQuestion.value = "";
+      inputQuestion.disabled = false;
+      inputQuestion.focus();
+    });
+
+  if (result.value) result.value += "\n\n\n";
+
+  result.value += `Eu: ${sQuestion}`;
+  inputQuestion.value = "Carregando...";
+  inputQuestion.disabled = true;
+
+  result.scrollTop = result.scrollHeight;
+}
+              }
+          };
+  
+          xhr.send();
+      }
+
+    function scrollToBottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+  </script>
+  </div> <!-- Feche a div que envolve todo o conteúdo do site -->
+</div>
+<%- include ('partials/footer.ejs') %>
+</html>

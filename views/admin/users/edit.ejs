@@ -1,0 +1,37 @@
+<%- include ('../../partials/header.ejs') %>
+<%- include ('../../partials/navbar.ejs') %>
+
+<div class="container">
+   <hr>
+   <div class="card mt-3">
+       <div class="card-header">
+           Edição de usuário
+       </div>
+       <div class="card-body">
+           <form action="/admin/users/edit/<%= user.id %>" method="POST">
+               <input class="form-control" name="email" type="email" value="<%= user.email %>"><br>
+               <button type="button" id="showPasswordFields" class="btn btn-primary btn-block">Alterar Senha</button>
+               <div id="passwordFields" style="display: none;">
+                   <input class="form-control" name="password" type="password" placeholder="Nova senha"><br>
+               </div>
+               <br> <!-- Adicione uma quebra de linha para criar espaço -->
+               <button type="submit" class="btn btn-primary btn-block" style="border: #000 3px solid">Salvar</button>
+           </form>
+       </div>
+   </div>
+</div>
+
+<script>
+   const showPasswordFieldsBtn = document.getElementById("showPasswordFields");
+   const passwordFields = document.getElementById("passwordFields");
+
+   showPasswordFieldsBtn.addEventListener("click", () => {
+       if (passwordFields.style.display === "none") {
+           passwordFields.style.display = "block";
+       } else {
+           passwordFields.style.display = "none";
+       }
+   });
+</script>
+
+<%- include ('../../partials/footer.ejs') %>

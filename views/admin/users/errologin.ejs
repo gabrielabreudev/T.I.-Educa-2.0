@@ -1,0 +1,70 @@
+<%- include ('../../partials/header.ejs') %>
+
+<div class="login-container">
+    <div class="card mt-3">
+        <div class="card-header">
+            T.I. Educa
+        </div>
+        <div class="card-body">
+            <form action="/authenticate" method="POST">
+                <input class="form-control" name="email" type="email" placeholder="email@exemplo.com"><br>
+                <input class="form-control" name="password" type="password" placeholder="********"><br>
+                <input class="erro" style="display: none;">Email ou senha inválida<br>
+                <button type="submit" class="btn btn-primary btn-block">Logar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<h1 class="site-title">T.I. Educa</h1>
+
+
+
+    <style>
+/* Estilos para a página de login */
+body {
+    background-color: #007bff; /* Fundo azul */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    background-color: #fff; /* Fundo branco do formulário */
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    width: 300px; /* Largura do formulário */
+    text-align: center;
+}
+
+.site-title {
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 35px;
+    color: #007bff; /* Cor do título */
+    margin: 0;
+    position: absolute;
+    top: 10px; /* Ajuste a posição vertical conforme necessário */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.card-header {
+    background-color: #007bff;
+    color: #fff;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 35px;
+    color: white;
+     margin: 0;
+}
+
+/* Estilos para o erro (você pode ajustar conforme necessário) */
+.erro {
+    color: red;
+    margin-top: 10px;
+}
+    </style>
+
+    <%- include ('../../partials/footer.ejs') %>

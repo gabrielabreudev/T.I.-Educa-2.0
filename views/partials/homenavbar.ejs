@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Seção head do seu documento -->
+
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary justify-content-center" style="display: block; border:rgb(6, 4, 142) 2px solid">
+        <div class="d-flex justify-content-between align-items-center m-0" style="width: 100%;">
+            <div class="d-flex">
+                <div class="form-group" style="margin: 0;">
+                    <select class="form-control custom-select mr-3" id="categoryDropdown" onchange="redirectToCategory(this)">
+                        <option value="">Categorias</option>
+                        <% categories.forEach(category => { %>
+                            <option value="<%= category.slug %>"><%= category.title %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; margin: 0;">
+              <a class="navbar-brand" href="/" style="display: flex; align-items: center;">
+                <h1 style="font-family: 'Comic Sans MS', cursive; font-size: 35px; color: white; margin: 0;">T.I. Educa</h1>
+              </a>
+            </div>
+
+            <div class="d-flex">
+                <a href="#" class="btn btn-success rounded-pill mr-2" style="border: #027f1f 3px solid" onclick="openPopup()">Chat</a>
+                <a class="btn btn-danger rounded-pill" style="border: #9a0404 3px solid" href="/login">Área admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Seu conteúdo HTML aqui -->
+
+    <style>
+        /* Estilos personalizados para o dropdown */
+        .custom-select {
+            background-color: rgb(0, 34, 255);
+            color: white; 
+            border: 2px solid rgb(6, 4, 142); 
+        }
+    </style>
+
+    <script>
+        function openPopup() {
+            window.open("https://tawk.to/chat/646571cdad80445890ed94a3/1h0m493ef", "_blank", "width=600,height=400");
+        }
+
+        function redirectToCategory(selectElement) {
+            const selectedCategorySlug = selectElement.value;
+            if (selectedCategorySlug) {
+                window.location.href = `/category/${selectedCategorySlug}`;
+            }
+        }
+    </script>
+
+    <!-- Inclua a biblioteca Bootstrap (caso necessário) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.7.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

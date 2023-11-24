@@ -1,0 +1,361 @@
+<%- include ('partials/header.ejs') %>
+<%- include ('partials/homenavbar.ejs') %>
+
+<style>
+    /* Estilos para o botão "Curtir" */
+    .like-button-container {
+        text-align: center; /* Centralize o conteúdo horizontalmente */
+        margin-top: 20px; /* Ajuste a margem superior para espaçamento */
+    }
+
+    .like-button {
+        background-color: blue; /* Defina a cor de fundo como azul */
+        color: white; /* Defina a cor do texto como branca */
+        border: none; /* Remova a borda */
+        padding: 10px 20px; /* Ajuste o preenchimento interno para espaçamento */
+        cursor: pointer; /* Altere o cursor para indicar interatividade */
+        border-radius: 10px; /* Arredonde as bordas do botão */
+    }
+
+    /* Estilos para a notificação */
+    .notification {
+        display: none; /* Inicialmente, oculte a notificação */
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #0074cc; /* Tom de azul */
+        color: white; /* Cor do texto branca */
+        padding: 20px;
+        border-radius: 10px; /* Bordas arredondadas */
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+
+    /* Estilos para o botão "Fechar" da notificação */
+    .close-button {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        cursor: pointer;
+        color: white; /* Cor do botão "Fechar" branca */
+    }
+</style>
+
+<style>
+    /* Estilos para os comentários */
+    .comment-section {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f5f5f5;
+    }
+
+    .comment-form {
+        margin-bottom: 20px;
+    }
+
+    .comment-textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        resize: none;
+    }
+
+    .comment-button {
+        background-color: blue;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .comment-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .comment-item {
+        display: flex;
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: white;
+    }
+
+    .comment-item p {
+        margin: 0;
+    }
+
+    .comment-date {
+        font-size: 12px;
+        color: #888;
+    }
+
+    .agent-icon {
+        font-size: 20px;
+        margin-right: 10px;
+    }
+
+    .arrow {
+        font-size: 20px;
+        margin: 0 10px;
+    }
+</style>
+
+
+<div class="container">
+    <br>
+    <div class="card-header">
+        <h2><%= article.title %></h2>
+    </div>
+    <div class="card-body">
+         <%- article.body %>
+    </div>
+
+    <!-- Botão "Curtir" -->
+    <div class="like-button-container">
+        <button class="like-button" onclick="likeArticle('<%= article.id %>')">Curtir</button>
+        <span id="likeCount_<%= article.id %>"><%= article.likes %></span> curtidas
+    </div>
+
+    <!-- Notificação -->
+    <div id="notification" class="notification">
+        <span class="close-button" onclick="closeNotification()">&times;</span>
+        Você já curtiu este artigo.
+    </div>
+</div>
+
+<script>
+    // Adicione um script para recuperar a contagem de curtidas quando o artigo for carregado
+    window.onload = function () {
+        // Use o ID do artigo atual para obter a contagem de curtidas
+        const articleId = '<%= article.id %>';
+        fetch(`/getLikeCount/${articleId}`)
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    const likeCountElement = document.getElementById(`likeCount_${articleId}`);
+                    likeCountElement.textContent = data.likeCount;
+                } else {
+                    console.error('Erro ao obter a contagem de curtidas do artigo');
+                }
+            })
+            .catch((error) => {
+                console.error('Erro ao obter a contagem de curtidas do artigo:', error);
+            });
+                // Carregue os comentários quando a página for carregada
+      loadComments(articleId);
+    };
+</script>
+
+<script>
+    function likeArticle(articleId) {
+      const likedKey = `liked_${articleId}`;
+      
+      // Verifique se o usuário já curtiu este artigo
+      if (localStorage.getItem(likedKey)) {
+        // Exiba a notificação
+        const notification = document.getElementById('notification');
+        notification.style.display = 'block';
+        return; // Saia da função para impedir curtir novamente
+      }
+
+      // Envie uma solicitação AJAX (por exemplo, usando fetch) para o servidor
+      fetch('/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Atualize a contagem de curtidas na interface
+            const likeCountElement = document.getElementById(`likeCount_${articleId}`);
+            likeCountElement.textContent = data.likeCount;
+
+            // Marque o artigo como curtido no armazenamento local
+            localStorage.setItem(likedKey, 'true');
+          } else {
+            console.error('Erro ao curtir o artigo');
+          }
+        })
+        .catch((error) => {
+          console.error('Erro ao curtir o artigo:', error);
+        });
+    }
+
+    // Função para fechar a notificação
+    function closeNotification() {
+        const notification = document.getElementById('notification');
+        notification.style.display = 'none';
+    }
+</script>
+
+<div class="comment-section">
+    <h3>Comentários</h3>
+    <form id="commentForm" class="comment-form">
+        <textarea id="commentText" class="comment-textarea" placeholder="Escreva seu comentário aqui" rows="4"></textarea>
+        <button type="submit" class="comment-button">Comentar</button>
+    </form>
+    <ul id="commentList" class="comment-list">
+        <!-- Outros comentários aqui... -->
+    </ul>
+    
+</div>
+
+<script>
+    // Evento de envio do formulário de comentários
+    const commentForm = document.getElementById('commentForm');
+    commentForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+    
+      const commentText = document.getElementById('commentText').value;
+      const articleId = '<%= article.id %>'; // Use o ID do artigo atual
+    
+      // Envie o comentário para o servidor
+      fetch('/comment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleId, commentText }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Atualize a lista de comentários na página
+            loadComments(articleId);
+            document.getElementById('commentText').value = ''; // Limpe o campo de texto do comentário
+          } else {
+            console.error('Erro ao enviar o comentário:', data.message);
+          }
+        })
+        .catch((error) => {
+          console.error('Erro ao enviar o comentário:', error);
+        });
+    });
+    
+    // Função para carregar e exibir os comentários na página
+    function loadComments(articleId) {
+      const commentList = document.getElementById('commentList');
+    
+      // Solicite os comentários do servidor
+      fetch(`/getComments/${articleId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            const comments = data.comments;
+    
+            // Limpe a lista de comentários existente
+            commentList.innerHTML = '';
+    
+            // Adicione os comentários à lista
+            comments.forEach((comment) => {
+              const commentItem = document.createElement('li');
+              commentItem.classList.add('comment-item'); // Adicione a classe "comment-item"
+
+              // Crie elementos para o ícone do agente e a seta
+              const agentIcon = document.createElement('span');
+              agentIcon.classList.add('agent-icon');
+              agentIcon.textContent = '👤'; // Ícone do agente
+
+              const arrow = document.createElement('span');
+              arrow.classList.add('arrow');
+              arrow.textContent = '➜'; // Seta
+
+              // Crie um elemento para o texto do comentário
+              const commentText = document.createElement('p');
+              commentText.textContent = comment.text;
+
+              // Crie um elemento para a data do comentário
+              const commentDate = document.createElement('p');
+              commentDate.classList.add('comment-date');
+              commentDate.textContent = `(em ${formatDate(comment.createdAt)})`;
+
+              // Adicione os elementos criados ao item do comentário
+              commentItem.appendChild(agentIcon);
+              commentItem.appendChild(arrow);
+              commentItem.appendChild(commentText);
+              commentItem.appendChild(commentDate);
+
+              // Adicione o item do comentário à lista de comentários
+              commentList.appendChild(commentItem);
+            });
+          } else {
+            console.error('Erro ao obter os comentários:', data.message);
+          }
+        })
+        .catch((error) => {
+          console.error('Erro ao obter os comentários:', error);
+        });
+    };
+</script>
+
+<script>
+    // Função para formatar a data
+    function formatDate(dateString) {
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+
+    // Função para carregar e exibir os comentários na página
+    function loadComments(articleId) {
+        const commentList = document.getElementById('commentList');
+
+        // Solicite os comentários do servidor
+        fetch(`/getComments/${articleId}`)
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    const comments = data.comments;
+
+                    // Limpe a lista de comentários existente
+                    commentList.innerHTML = '';
+
+                    // Adicione os comentários à lista
+                    comments.forEach((comment) => {
+                        const commentItem = document.createElement('li');
+                        commentItem.classList.add('comment-item'); // Adicione a classe "comment-item"
+
+                        // Crie elementos para o ícone do agente e a seta
+                        const agentIcon = document.createElement('span');
+                        agentIcon.classList.add('agent-icon');
+                        agentIcon.textContent = '👤'; // Ícone do agente
+
+                        const arrow = document.createElement('span');
+                        arrow.classList.add('arrow');
+                        arrow.textContent = '➜'; // Seta
+
+                        // Crie um elemento para o texto do comentário
+                        const commentText = document.createElement('p');
+                        commentText.classList.add('comment-text'); // Adicione a classe "comment-text"
+                        commentText.textContent = comment.text;
+
+                        // Crie um elemento para a data do comentário
+                        const commentDate = document.createElement('p');
+                        commentDate.classList.add('comment-date');
+                        commentDate.textContent = `(em ${formatDate(comment.createdAt)})`;
+
+                        // Adicione os elementos criados ao item do comentário
+                        commentItem.appendChild(agentIcon);
+                        commentItem.appendChild(arrow);
+                        commentItem.appendChild(commentText);
+                        commentItem.appendChild(commentDate);
+
+                        // Adicione o item do comentário à lista de comentários
+                        commentList.appendChild(commentItem);
+                    });
+                } else {
+                    console.error('Erro ao obter os comentários:', data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Erro ao obter os comentários:', error);
+            });
+    };
+</script>
+
+<%- include ('partials/footer.ejs') %>
